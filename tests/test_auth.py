@@ -123,12 +123,13 @@ class TestPairingManager:
 
 class TestAuthMiddleware:
     @pytest.mark.asyncio
-    async def test_unauthenticated_request_returns_401(self, db_path, tmp_path):
+    async def test_unauthenticated_request_returns_401(self, db_path):
         """Requests without a valid token return 401 on protected endpoints."""
         from server.main import create_app
         app = create_app(db_path=db_path, mock_mode=True)
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.get("/api/v1/server/status")
+            async with app.router.lifespan_context(app):
+                response = await ac.get("/api/v1/status")
         assert response.status_code == 401
 
     @pytest.mark.asyncio
@@ -137,7 +138,8 @@ class TestAuthMiddleware:
         from server.main import create_app
         app = create_app(db_path=db_path, mock_mode=True)
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.get("/api/v1/pair/code")
+            async with app.router.lifespan_context(app):
+                response = await ac.get("/api/v1/pair/code")
         # 200 (code available) or 404 (already paired) — not 401
         assert response.status_code != 401
 
@@ -152,8 +154,9 @@ class TestAuthMiddleware:
 
         app = create_app(db_path=db_path, mock_mode=True)
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.get(
-                "/api/v1/server/status",
-                headers={"Authorization": f"Bearer {token}"},
-            )
+            async with app.router.lifespan_context(app):
+                response = await ac.get(
+                    "/api/v1/status",
+                    headers={"Authorization": f"Bearer {token}"},
+                )
         assert response.status_code == 200
