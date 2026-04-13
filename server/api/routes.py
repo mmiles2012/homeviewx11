@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from server.api.dependencies import get_engine, get_source_registry, get_preset_manager
 from server.composition.engine import CompositionEngine
 from server.models import SourceCreate, SourceUpdate
+from server.composition.interactive import InteractiveManager, InteractiveConflictError
 from server.presets.manager import PresetManager, PresetNotFoundError as _PresetNotFoundError
 from server.sources.registry import SourceNotFoundError, SourceAlreadyExistsError, SourceRegistry
 
@@ -191,10 +192,27 @@ async def delete_preset(preset_id: str, mgr: PresetManager = Depends(get_preset_
 
 
 # ---------------------------------------------------------------------------
-# Stubs — Interactive Mode (Task 14)
+# Interactive Mode
 # ---------------------------------------------------------------------------
 
 @router.post("/interactive/start")
+async def start_interactive(
+    body: dict,
+    engine: CompositionEngine = Depends(get_engine),
+) -> dict:
+    cell_index = body.get("cell_index")
+    if cell_index is None:
+        raise _err("MISSING_FIELD", "cell_index is required", 422)
+    try:
+        engine.interactive.start(cell_index=int(cell_index))
+    except InteractiveConflictError as e:
+        raise _err("CONFLICT", str(e), 409)
+    engine._notify_state_change()
+    return {"is_active": True, "active_cell_index": cell_index}
+
+
 @router.post("/interactive/stop")
-async def interactive_stub() -> JSONResponse:
-    return JSONResponse(status_code=501, content=_NOT_IMPLEMENTED)
+async def stop_interactive(engine: CompositionEngine = Depends(get_engine)) -> dict:
+    engine.interactive.stop()
+    engine._notify_state_change()
+    return {"is_active": False, "active_cell_index": None}

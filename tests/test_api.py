@@ -179,8 +179,8 @@ class TestStubs:
         assert r.json() == []
 
     @pytest.mark.asyncio
-    async def test_interactive_stub_returns_501(self, api_client):
-        """Interactive mode endpoints return 501 until Task 14."""
+    async def test_interactive_start_returns_200(self, api_client):
+        """Interactive mode endpoints are implemented (Task 14)."""
         r = await api_client.post("/api/v1/interactive/start", json={"cell_index": 0})
-        assert r.status_code == 501
-        assert r.json()["error"]["code"] == "NOT_IMPLEMENTED"
+        assert r.status_code == 200
+        assert r.json()["is_active"] is True

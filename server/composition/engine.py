@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Optional
 
 from server.composition.cell import Cell, CellStatus, ChromiumLauncher
+from server.composition.interactive import InteractiveManager
 from server.composition.layout import LayoutManager, LayoutNotFoundError
 from server.composition.window import WindowManager
 from server.models import CellState, AudioState, ServerStatus
@@ -53,6 +54,7 @@ class CompositionEngine:
         self._active_audio_cell: int | None = None
         self._state_callbacks: list[Callable[[EngineState], None]] = []
         self._enforce_task: asyncio.Task | None = None
+        self.interactive = InteractiveManager()
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -232,6 +234,9 @@ class CompositionEngine:
             await asyncio.sleep(_GEOMETRY_ENFORCE_INTERVAL)
             for cell in self._cells:
                 if cell.status == CellStatus.RUNNING:
+                    # Skip the cell that is currently in interactive mode
+                    if self.interactive.active_cell_index == cell.cell_index:
+                        continue
                     try:
                         await self._place_window(cell)
                     except Exception as exc:
