@@ -23,3 +23,8 @@ def get_token_manager(request: Request) -> TokenManager:
 
 def get_pairing_manager(request: Request) -> PairingManager:
     return request.app.state.pairing_manager
+
+
+def get_preset_manager(request: Request):
+    from server.presets.manager import PresetManager
+    return request.app.state.preset_manager

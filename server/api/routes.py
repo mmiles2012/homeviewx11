@@ -4,9 +4,10 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from server.api.dependencies import get_engine, get_source_registry
+from server.api.dependencies import get_engine, get_source_registry, get_preset_manager
 from server.composition.engine import CompositionEngine
 from server.models import SourceCreate, SourceUpdate
+from server.presets.manager import PresetManager, PresetNotFoundError as _PresetNotFoundError
 from server.sources.registry import SourceNotFoundError, SourceAlreadyExistsError, SourceRegistry
 
 router = APIRouter(prefix="/api/v1")
@@ -154,16 +155,44 @@ async def set_active_audio(body: dict, engine: CompositionEngine = Depends(get_e
 
 
 # ---------------------------------------------------------------------------
-# Stubs — Presets (Task 13) and Interactive Mode (Task 14)
+# Presets
 # ---------------------------------------------------------------------------
 
 @router.get("/presets")
-@router.post("/presets")
-@router.put("/presets/{preset_id}/apply")
-@router.delete("/presets/{preset_id}")
-async def presets_stub() -> JSONResponse:
-    return JSONResponse(status_code=501, content=_NOT_IMPLEMENTED)
+async def list_presets(mgr: PresetManager = Depends(get_preset_manager)) -> list:
+    presets = await mgr.list_presets()
+    return [p.model_dump() for p in presets]
 
+
+@router.post("/presets", status_code=201)
+async def save_preset(body: dict, mgr: PresetManager = Depends(get_preset_manager)) -> dict:
+    name = body.get("name")
+    if not name:
+        raise _err("MISSING_FIELD", "name is required", 422)
+    preset = await mgr.save_preset(name)
+    return preset.model_dump()
+
+
+@router.put("/presets/{preset_id}/apply")
+async def apply_preset(preset_id: str, mgr: PresetManager = Depends(get_preset_manager)) -> dict:
+    try:
+        await mgr.apply_preset(preset_id)
+    except _PresetNotFoundError:
+        raise _err("NOT_FOUND", f"Preset '{preset_id}' not found", 404)
+    return {"preset_id": preset_id}
+
+
+@router.delete("/presets/{preset_id}", status_code=204)
+async def delete_preset(preset_id: str, mgr: PresetManager = Depends(get_preset_manager)) -> None:
+    try:
+        await mgr.delete_preset(preset_id)
+    except _PresetNotFoundError:
+        raise _err("NOT_FOUND", f"Preset '{preset_id}' not found", 404)
+
+
+# ---------------------------------------------------------------------------
+# Stubs — Interactive Mode (Task 14)
+# ---------------------------------------------------------------------------
 
 @router.post("/interactive/start")
 @router.post("/interactive/stop")

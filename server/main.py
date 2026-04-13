@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI
 
 from server.api.events import EventBus
 from server.auth.middleware import make_auth_dependency
+from server.presets.manager import PresetManager
 from server.auth.pairing import PairingManager
 from server.auth.tokens import TokenManager
 from server.composition.cell import create_chromium_launcher
@@ -76,12 +77,15 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
 
     app = FastAPI(title="HomeView", version="1.0.0", lifespan=lifespan)
 
+    preset_mgr = PresetManager(db_path=resolved_db, engine=engine)
+
     # Attach shared state
     app.state.token_manager = token_mgr
     app.state.pairing_manager = pairing_mgr
     app.state.engine = engine
     app.state.source_registry = source_registry
     app.state.event_bus = event_bus
+    app.state.preset_manager = preset_mgr
     app.state.db_path = resolved_db
     app.state.mock_mode = resolved_mock
 

@@ -172,11 +172,11 @@ class TestAudio:
 
 class TestStubs:
     @pytest.mark.asyncio
-    async def test_presets_stub_returns_501(self, api_client):
-        """Preset endpoints return 501 until Task 13."""
+    async def test_presets_returns_200(self, api_client):
+        """Preset endpoints are implemented (Task 13)."""
         r = await api_client.get("/api/v1/presets")
-        assert r.status_code == 501
-        assert r.json()["error"]["code"] == "NOT_IMPLEMENTED"
+        assert r.status_code == 200
+        assert r.json() == []
 
     @pytest.mark.asyncio
     async def test_interactive_stub_returns_501(self, api_client):
