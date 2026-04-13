@@ -1,16 +1,16 @@
 """Tests for server configuration."""
 import os
-import pytest
 
 
 def test_config_defaults():
     """Config loads with sensible defaults."""
-    # Clear any env overrides
+    from server.config import get_config
+    # Clear any env overrides and reset cache
     os.environ.pop("HOMEVIEW_MOCK", None)
     os.environ.pop("HOMEVIEW_PORT", None)
     os.environ.pop("HOMEVIEW_HOST", None)
+    get_config.cache_clear()
 
-    from server.config import get_config
     config = get_config()
 
     assert config.port == 8000

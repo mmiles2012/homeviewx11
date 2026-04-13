@@ -1,9 +1,8 @@
 """Tests for the layout system."""
-import json
 import pytest
 from pathlib import Path
 
-from server.composition.layout import LayoutManager, CellGeometry, LayoutNotFoundError
+from server.composition.layout import LayoutManager, LayoutNotFoundError
 
 
 LAYOUTS_DIR = Path(__file__).parent.parent / "layouts"

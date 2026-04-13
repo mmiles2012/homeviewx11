@@ -4,13 +4,15 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass, field
-from typing import Callable, Optional
+from typing import Callable
 
+from server.audio.router import AudioRouter
 from server.composition.cell import Cell, CellStatus, ChromiumLauncher
+from server.composition.health import HealthMonitor
 from server.composition.interactive import InteractiveManager
 from server.composition.layout import LayoutManager, LayoutNotFoundError
 from server.composition.window import WindowManager
-from server.models import CellState, AudioState, ServerStatus
+from server.models import CellState, AudioState
 from server.sources.registry import SourceRegistry
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ class CompositionEngine:
         window_manager: WindowManager,
         chromium_launcher: ChromiumLauncher,
         source_registry: SourceRegistry,
+        audio_router: AudioRouter | None = None,
         display_width: int = 1920,
         display_height: int = 1080,
         default_layout_id: str = "single",
@@ -45,6 +48,7 @@ class CompositionEngine:
         self._window_manager = window_manager
         self._chromium_launcher = chromium_launcher
         self._source_registry = source_registry
+        self._audio_router = audio_router
         self._display_width = display_width
         self._display_height = display_height
         self._default_layout_id = default_layout_id
@@ -55,6 +59,7 @@ class CompositionEngine:
         self._state_callbacks: list[Callable[[EngineState], None]] = []
         self._enforce_task: asyncio.Task | None = None
         self.interactive = InteractiveManager()
+        self._health_monitor = HealthMonitor()
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -67,6 +72,7 @@ class CompositionEngine:
 
     async def stop(self) -> None:
         """Stop all cells and cancel background tasks."""
+        await self._health_monitor.stop()
         if self._enforce_task is not None:
             self._enforce_task.cancel()
             try:
@@ -100,7 +106,8 @@ class CompositionEngine:
                 new_assignments = self._layout_manager.compute_transition(
                     old_layout, new_layout, old_assignments
                 )
-            except Exception:
+            except Exception as exc:
+                logger.warning("compute_transition failed: %s", exc)
                 new_assignments = {c.index: None for c in new_layout.cells}
         else:
             new_assignments = {c.index: None for c in new_layout.cells}
@@ -139,16 +146,25 @@ class CompositionEngine:
 
         # Stop existing process if running
         if cell.status != CellStatus.EMPTY:
+            self._health_monitor.unwatch(cell.cell_index)
             await cell.stop()
 
         source = await self._source_registry.get_source(source_id)
         await cell.launch(url=source.url, source_id=source_id)
         await self._place_window(cell)
+        self._health_monitor.watch(cell)
+
+        # Route audio if this cell is the active audio cell
+        if self._audio_router and self._active_audio_cell == cell_index and cell.pid:
+            all_pids = [c.pid for c in self._cells if c.pid is not None]
+            await self._audio_router.set_active_cell(cell.pid, all_pids)
+
         self._notify_state_change()
 
     async def clear_cell(self, cell_index: int) -> None:
         """Stop the Chromium process in the given cell."""
         cell = self._get_cell(cell_index)
+        self._health_monitor.unwatch(cell.cell_index)
         await cell.stop()
         self._notify_state_change()
 

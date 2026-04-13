@@ -125,7 +125,6 @@ class TestDisplayResolution:
     async def test_geometry_recomputed_on_resolution_change(self, engine):
         """Changing display resolution triggers geometry recompute."""
         await engine.assign_source(cell_index=0, source_id="espn")
-        wm = engine._window_manager
         await engine.set_display_resolution(3840, 2160)
         # After resolution change, the window geometry should reflect new size
         # In mock mode, we just verify it didn't crash and state is consistent

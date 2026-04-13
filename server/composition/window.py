@@ -156,7 +156,6 @@ class X11WindowManager(WindowManager):
         win = self._display.create_resource_object("window", window_id)
         # MWM_HINTS_DECORATIONS = 1<<1; value 0 = no decorations
         # Format: flags, functions, decorations, input_mode, status
-        from Xlib.protocol import rq
         win.change_property(
             motif_hints,
             motif_hints,

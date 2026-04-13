@@ -2,17 +2,18 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import Depends, FastAPI
 
 from server.api.events import EventBus
+from server.audio.router import create_audio_router
 from server.auth.middleware import make_auth_dependency
 from server.presets.manager import PresetManager
 from server.auth.pairing import PairingManager
 from server.auth.tokens import TokenManager
 from server.composition.cell import create_chromium_launcher
 from server.composition.engine import CompositionEngine
+from server.composition.display import detect_display_resolution
 from server.composition.layout import LayoutManager
 from server.composition.window import create_window_manager
 from server.config import get_config
@@ -41,14 +42,20 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
         profiles_dir=config.profiles_dir,
         chromium_binary=config.chromium_binary,
     )
-    display_w = config.mock_display_width if resolved_mock else 1920
-    display_h = config.mock_display_height if resolved_mock else 1080
+    if resolved_mock:
+        display_w = config.mock_display_width
+        display_h = config.mock_display_height
+    else:
+        display_w, display_h = detect_display_resolution(display=config.display)
+
+    audio_router = create_audio_router(mock_mode=resolved_mock)
 
     engine = CompositionEngine(
         layout_manager=layout_manager,
         window_manager=window_manager,
         chromium_launcher=chromium_launcher,
         source_registry=source_registry,
+        audio_router=audio_router,
         display_width=display_w,
         display_height=display_h,
     )
@@ -66,10 +73,13 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
                 "cells": [c.model_dump() for c in state.cells],
                 "audio": state.audio.model_dump(),
             }
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.ensure_future(event_bus.emit("state.updated", payload))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(event_bus.emit("state.updated", payload))
+            except RuntimeError:
+                pass  # no running loop (e.g. during shutdown)
 
+        await audio_router.setup()
         engine.on_state_change(_on_state)
         await engine.start()
 
@@ -79,6 +89,7 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
 
         yield
         await engine.stop()
+        await audio_router.cleanup()
 
     app = FastAPI(title="HomeView", version="1.0.0", lifespan=lifespan)
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
@@ -80,7 +80,7 @@ class LayoutManager:
 
     def list_layouts(self) -> list[Layout]:
         """Return all loaded layouts ordered by id."""
-        return sorted(self._layouts.values(), key=lambda l: l.id)
+        return sorted(self._layouts.values(), key=lambda lay: lay.id)
 
     def get_layout(self, layout_id: str) -> Layout:
         """Return a layout by id, or raise LayoutNotFoundError."""

@@ -26,5 +26,4 @@ def get_pairing_manager(request: Request) -> PairingManager:
 
 
 def get_preset_manager(request: Request):
-    from server.presets.manager import PresetManager
     return request.app.state.preset_manager

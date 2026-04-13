@@ -83,15 +83,20 @@ class _MockProcess:
     def __init__(self, pid: int) -> None:
         self.pid = pid
         self.returncode: int | None = None
+        self._exit_event: asyncio.Event = asyncio.Event()
 
     async def wait(self) -> int:
-        return 0
+        """Block until the process is terminated."""
+        await self._exit_event.wait()
+        return self.returncode or 0
 
     def terminate(self) -> None:
         self.returncode = -15
+        self._exit_event.set()
 
     def kill(self) -> None:
         self.returncode = -9
+        self._exit_event.set()
 
 
 class MockChromiumLauncher(ChromiumLauncher):
@@ -143,6 +148,7 @@ class Cell:
         self.url: str | None = None
         self._process: Optional[asyncio.subprocess.Process] = None
         self._status = CellStatus.EMPTY
+        self._process_exit_event: asyncio.Event = asyncio.Event()
 
     @property
     def status(self) -> CellStatus:
@@ -155,10 +161,22 @@ class Cell:
     async def launch(self, url: str, source_id: str) -> None:
         """Start Chromium for this cell."""
         self._status = CellStatus.STARTING
+        self._process_exit_event.clear()
         self._process = await self.launcher.launch(url=url, cell_index=self.cell_index)
         self.url = url
         self.source_id = source_id
         self._status = CellStatus.RUNNING
+        # Monitor process exit in background and signal the event
+        asyncio.create_task(self._wait_for_exit())
+
+    async def _wait_for_exit(self) -> None:
+        """Background task: wait for process to exit and signal _process_exit_event."""
+        if self._process is not None:
+            try:
+                await self._process.wait()
+            except Exception:
+                pass
+        self._process_exit_event.set()
 
     async def stop(self) -> None:
         """Terminate the Chromium process and reset state."""
@@ -168,6 +186,7 @@ class Cell:
             except Exception:
                 pass
             self._process = None
+        self._process_exit_event.set()
         self.url = None
         self.source_id = None
         self._status = CellStatus.EMPTY

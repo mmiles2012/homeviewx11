@@ -4,7 +4,6 @@ from __future__ import annotations
 import hashlib
 import secrets
 
-import aiosqlite
 
 from server.db import get_db
 

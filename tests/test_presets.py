@@ -120,7 +120,7 @@ class TestPresetManager:
         from server.composition.cell import create_chromium_launcher
         from server.sources.registry import SourceRegistry
         from server.config import get_config
-        from server.presets.manager import PresetManager, PresetNotFoundError
+        from server.presets.manager import PresetManager
 
         config = get_config()
         layout_manager = LayoutManager()

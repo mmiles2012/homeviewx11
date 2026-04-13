@@ -1,7 +1,7 @@
 """Tests for the audio router."""
 import pytest
 
-from server.audio.router import MockAudioRouter, create_audio_router, AudioRouter
+from server.audio.router import MockAudioRouter, create_audio_router
 
 
 @pytest.fixture

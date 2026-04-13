@@ -1,7 +1,7 @@
 """Pairing manager — 6-digit code generation and validation."""
 from __future__ import annotations
 
-import random
+import secrets
 from datetime import datetime, timedelta, timezone
 
 from server.auth.tokens import TokenManager
@@ -21,7 +21,7 @@ class PairingManager:
 
     async def generate_pairing_code(self) -> str:
         """Generate a new 6-digit pairing code and persist it."""
-        code = f"{random.randint(0, 999999):06d}"
+        code = f"{secrets.randbelow(1_000_000):06d}"
         expires_at = (
             datetime.now(timezone.utc) + timedelta(minutes=_CODE_EXPIRY_MINUTES)
         ).isoformat()

@@ -76,7 +76,7 @@ class TestLayouts:
         r = await api_client.get("/api/v1/layouts")
         assert r.status_code == 200
         layouts = r.json()
-        ids = [l["id"] for l in layouts]
+        ids = [lay["id"] for lay in layouts]
         assert "single" in ids
         assert "2x2" in ids
 

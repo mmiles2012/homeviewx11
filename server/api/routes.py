@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse
 
 from server.api.dependencies import get_engine, get_source_registry, get_preset_manager
 from server.composition.engine import CompositionEngine
 from server.models import SourceCreate, SourceUpdate
-from server.composition.interactive import InteractiveManager, InteractiveConflictError
+from server.composition.interactive import InteractiveConflictError
 from server.presets.manager import PresetManager, PresetNotFoundError as _PresetNotFoundError
 from server.sources.registry import SourceNotFoundError, SourceAlreadyExistsError, SourceRegistry
 
@@ -56,7 +55,7 @@ async def get_status(engine: CompositionEngine = Depends(get_engine)) -> dict:
 @router.get("/layouts")
 async def list_layouts(engine: CompositionEngine = Depends(get_engine)) -> list:
     layouts = engine._layout_manager.list_layouts()
-    return [{"id": l.id, "name": l.name, "gap_px": l.gap_px, "cell_count": len(l.cells)} for l in layouts]
+    return [{"id": lay.id, "name": lay.name, "gap_px": lay.gap_px, "cell_count": len(lay.cells)} for lay in layouts]
 
 
 @router.put("/layout")

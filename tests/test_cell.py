@@ -1,5 +1,4 @@
 """Tests for the Cell class and Chromium process lifecycle."""
-import asyncio
 import pytest
 
 from server.composition.cell import Cell, CellStatus, MockChromiumLauncher, create_chromium_launcher
@@ -45,7 +44,6 @@ class TestCellLifecycle:
     async def test_restart_keeps_same_url(self, cell):
         """restart() stops and relaunches with the same URL."""
         await cell.launch(url="https://espn.com", source_id="espn")
-        old_pid = cell.pid
         await cell.restart()
         assert cell.status == CellStatus.RUNNING
         assert cell.url == "https://espn.com"

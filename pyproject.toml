@@ -17,6 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
+homeview = "server.cli:start"
 homeview-reset-pairing = "server.cli:reset_pairing"
 
 [project.optional-dependencies]
@@ -33,3 +34,8 @@ testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["server"]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.1.0",
+]

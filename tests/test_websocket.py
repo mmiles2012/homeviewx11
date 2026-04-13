@@ -1,7 +1,5 @@
 """Tests for WebSocket endpoint and event broadcasting."""
-import json
 import pytest
-from httpx import AsyncClient, ASGITransport
 
 from server.db import init_db
 from server.auth.pairing import PairingManager
