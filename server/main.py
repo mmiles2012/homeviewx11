@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI
 
+from server.api.events import EventBus
 from server.auth.middleware import make_auth_dependency
 from server.auth.pairing import PairingManager
 from server.auth.tokens import TokenManager
@@ -27,6 +28,7 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
     pairing_mgr = PairingManager(resolved_db)
     auth_dep = make_auth_dependency(token_mgr)
 
+    event_bus = EventBus()
     source_registry = SourceRegistry(resolved_db)
 
     layout_manager = LayoutManager()
@@ -54,6 +56,20 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
     async def lifespan(app: FastAPI):
         from server.db import init_db
         await init_db(resolved_db)
+
+        # Wire engine state changes into the event bus
+        def _on_state(state) -> None:
+            import asyncio
+            payload = {
+                "layout_id": state.layout_id,
+                "cells": [c.model_dump() for c in state.cells],
+                "audio": state.audio.model_dump(),
+            }
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                asyncio.ensure_future(event_bus.emit("state.updated", payload))
+
+        engine.on_state_change(_on_state)
         await engine.start()
         yield
         await engine.stop()
@@ -65,6 +81,7 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
     app.state.pairing_manager = pairing_mgr
     app.state.engine = engine
     app.state.source_registry = source_registry
+    app.state.event_bus = event_bus
     app.state.db_path = resolved_db
     app.state.mock_mode = resolved_mock
 
@@ -94,6 +111,10 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
     # Protected routes — include router with global auth dependency
     from server.api.routes import router
     app.include_router(router, dependencies=[Depends(auth_dep)])
+
+    # WebSocket (auth handled inside the handler via query param)
+    from server.api.websocket import ws_router
+    app.include_router(ws_router)
 
     return app
 
