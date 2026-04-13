@@ -1,0 +1,26 @@
+[Unit]
+Description=HomeView Multi-Stream Video Wall Controller
+Documentation=https://github.com/homeview/homeview
+After=network.target sound.target graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+User=homeview
+Group=homeview
+WorkingDirectory=/opt/homeview
+Environment="DISPLAY=:0"
+Environment="HOMEVIEW_PORT=8000"
+Environment="HOMEVIEW_DB_PATH=/var/lib/homeview/homeview.db"
+Environment="HOMEVIEW_PROFILES_DIR=/var/lib/homeview/profiles"
+Environment="HOMEVIEW_LAYOUTS_DIR=/opt/homeview/layouts"
+ExecStart=/opt/homeview/.venv/bin/python -m server.main
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+# Allow access to X11 display and audio
+SupplementaryGroups=audio video
+
+[Install]
+WantedBy=graphical-session.target

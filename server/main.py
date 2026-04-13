@@ -72,6 +72,11 @@ def create_app(db_path: str | None = None, mock_mode: bool = False) -> FastAPI:
 
         engine.on_state_change(_on_state)
         await engine.start()
+
+        # Auto-generate pairing code on first boot if not already paired
+        if not await pairing_mgr.is_paired():
+            await pairing_mgr.generate_pairing_code()
+
         yield
         await engine.stop()
 
