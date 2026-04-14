@@ -1,0 +1,9 @@
+{
+  "id": "side_by_side",
+  "name": "Side by Side",
+  "gap_px": 4,
+  "cells": [
+    { "index": 0, "role": "side", "x": 0.0,  "y": 0.0, "w": 0.5, "h": 1.0 },
+    { "index": 1, "role": "side", "x": 0.5,  "y": 0.0, "w": 0.5, "h": 1.0 }
+  ]
+}
