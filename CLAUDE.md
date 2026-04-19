@@ -2,7 +2,7 @@
 
 ## Project overview
 
-HomeView is a self-hosted multi-stream video wall controller. It runs a FastAPI server that manages multiple Chromium subprocesses on a single X11 display, positioning them via python-xlib according to JSON layout definitions. Clients pair over HTTP (6-digit code → Bearer token) and control the display via REST + WebSocket.
+Self-hosted multi-stream video wall controller. FastAPI server manages multiple Chromium subprocesses on single X11 display, positioned via python-xlib from JSON layout definitions. Clients pair over HTTP (6-digit code → Bearer token), control display via REST + WebSocket.
 
 **Stack:** Python 3.12+, FastAPI, uvicorn, aiosqlite (SQLite), pydantic-settings, python-xlib
 
@@ -21,7 +21,7 @@ HOMEVIEW_MOCK=1 uv run homeview
 uv run homeview-reset-pairing
 ```
 
-All config via env vars or `.env` file with `HOMEVIEW_` prefix. Key vars:
+Config via env vars or `.env` with `HOMEVIEW_` prefix. Key vars:
 - `HOMEVIEW_MOCK=1` — mock mode (no X11, no Chromium subprocesses)
 - `HOMEVIEW_PORT=8000`, `HOMEVIEW_DISPLAY=:0`
 - `HOMEVIEW_DB_PATH`, `HOMEVIEW_PROFILES_DIR`, `HOMEVIEW_LAYOUTS_DIR`
@@ -36,21 +36,21 @@ uv run pytest -q --cov=server --cov-fail-under=80  # with coverage
 uv run pytest tests/test_engine.py -q              # single file
 ```
 
-**All tests use mock mode** — the test suite never spawns real Chromium or touches X11. The `conftest.py` wires up async fixtures and a mock app. Never set `HOMEVIEW_MOCK=0` in tests.
+All tests use mock mode — never spawn real Chromium or touch X11. `conftest.py` wires async fixtures + mock app. Never set `HOMEVIEW_MOCK=0` in tests.
 
-**Test files map 1:1 to modules** (e.g. `tests/test_engine.py` → `server/composition/engine.py`).
+Test files map 1:1 to modules (`tests/test_engine.py` → `server/composition/engine.py`).
 
 ---
 
 ## Code conventions
 
-- `from __future__ import annotations` in every module (deferred evaluation)
+- `from __future__ import annotations` in every module
 - Public functions: type hints required, modern syntax (`list[int]`, `str | None`)
-- Pydantic v2 models throughout — use `model_dump()`, `model_validate()`, not `.dict()`/`.parse_obj()`
-- Async/await everywhere in the server layer; sync only in layout/config utilities
-- Error responses follow `{"error": {"code": "SNAKE_CASE", "message": "...", "details": {}}}` shape
-- Route prefixes: all REST endpoints live under `/api/v1/`
-- FastAPI `Depends()` for injecting engine/registry/preset manager — see `server/api/dependencies.py`
+- Pydantic v2: `model_dump()`, `model_validate()` — never `.dict()`/`.parse_obj()`
+- Async/await throughout server layer; sync only in layout/config utilities
+- Error responses: `{"error": {"code": "SNAKE_CASE", "message": "...", "details": {}}}`
+- Route prefix: `/api/v1/` for all REST endpoints
+- `FastAPI Depends()` for engine/registry/preset injection — see `server/api/dependencies.py`
 
 ---
 
@@ -58,33 +58,33 @@ uv run pytest tests/test_engine.py -q              # single file
 
 ### CompositionEngine (`server/composition/engine.py`)
 
-Central coordinator. Holds the current layout, list of `Cell` objects, and audio routing state. Emits state change events via registered callbacks (wired to `EventBus` → WebSocket in `main.py`).
+Central coordinator. Holds current layout, `Cell` list, audio routing state. Emits state changes via callbacks (wired to `EventBus` → WebSocket in `main.py`).
 
 Key methods: `start()`, `stop()`, `set_layout()`, `assign_source()`, `clear_cell()`, `get_state()`.
 
-Background task `_geometry_enforcer` re-applies X11 window geometry every 5 s (handles windows that escape placement).
+Background task `_geometry_enforcer` re-applies X11 geometry every 5 s.
 
 ### Cell (`server/composition/cell.py`)
 
-Wraps one Chromium subprocess. Status: `EMPTY → STARTING → RUNNING`. Uses `ChromiumLauncher` abstraction so tests inject `MockChromiumLauncher` instead of real subprocesses.
+Wraps one Chromium subprocess. Status: `EMPTY → STARTING → RUNNING`. Uses `ChromiumLauncher` abstraction — tests inject `MockChromiumLauncher`.
 
-Chromium is launched in `--app=<url>` mode (NOT `--kiosk`) with a per-cell `--user-data-dir` profile.
+Chromium launched in `--app=<url>` mode (NOT `--kiosk`) with per-cell `--user-data-dir`.
 
 ### LayoutManager (`server/composition/layout.py`)
 
-Loads `*.json` files from `layouts/`. Cell positions are proportional `[0,1]` — `compute_geometry()` converts to pixels at runtime. `compute_transition()` maps sources across layout changes by role priority (hero → side → grid → pip).
+Loads `*.json` from `layouts/`. Cell positions proportional `[0,1]` — `compute_geometry()` converts to pixels. `compute_transition()` maps sources across layout changes by role priority (hero → side → grid → pip).
 
 ### Auth flow
 
-1. On first boot, server generates a 6-digit code stored in `server_state` table (5 min TTL).
-2. Client fetches `GET /api/v1/pair/code` and submits to `POST /api/v1/pair`.
-3. On success, code is consumed and a Bearer token is issued (stored in `tokens` table).
-4. All protected routes require `Authorization: Bearer <token>`.
+1. First boot: server generates 6-digit code in `server_state` table (5 min TTL).
+2. Client: `GET /api/v1/pair/code` → submit to `POST /api/v1/pair`.
+3. Success: code consumed, Bearer token issued (stored in `tokens` table).
+4. Protected routes require `Authorization: Bearer <token>`.
 5. WebSocket authenticates via `?token=` query param.
 
 ### Mock mode
 
-`HOMEVIEW_MOCK=1` substitutes `MockChromiumLauncher` (fake PIDs, no subprocess) and `MockWindowManager` (no-op X11 calls). Display resolution defaults to 1920×1080. The entire API and WebSocket still function normally. Always use this for development and CI.
+`HOMEVIEW_MOCK=1` substitutes `MockChromiumLauncher` (fake PIDs) + `MockWindowManager` (no-op X11). Display defaults to 1920×1080. Full API + WebSocket still function. Always use for dev and CI.
 
 ---
 
@@ -102,7 +102,7 @@ Loads `*.json` files from `layouts/`. Cell positions are proportional `[0,1]` �
 }
 ```
 
-`role` values: `hero`, `side`, `grid`, `pip` — used for transition priority when switching layouts.
+`role` values: `hero`, `side`, `grid`, `pip` — transition priority order.
 
 ---
 
