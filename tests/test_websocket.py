@@ -1,4 +1,5 @@
 """Tests for WebSocket endpoint and event broadcasting."""
+
 import pytest
 
 from server.db import init_db
@@ -71,6 +72,7 @@ class TestWebSocketAuth:
         from starlette.testclient import TestClient
         from starlette.websockets import WebSocketDisconnect
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
         with TestClient(app) as client:
             with pytest.raises(WebSocketDisconnect) as exc_info:
@@ -83,6 +85,7 @@ class TestWebSocketAuth:
         """WebSocket connection with valid token query param is accepted."""
         from starlette.testclient import TestClient
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
         with TestClient(app) as client:
             with client.websocket_connect(f"/ws/control?token={auth_token}") as ws:
@@ -95,6 +98,7 @@ class TestWebSocketAuth:
         """WebSocket connection with invalid token is rejected."""
         from starlette.testclient import TestClient
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
         with TestClient(app) as client:
             with pytest.raises(Exception):
@@ -108,6 +112,7 @@ class TestWebSocketEvents:
         """state.updated event fires when layout changes via API."""
         from starlette.testclient import TestClient
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
         with TestClient(app) as client:
             with client.websocket_connect(f"/ws/control?token={auth_token}") as ws:
@@ -130,6 +135,7 @@ class TestWebSocketEvents:
         """state.updated event fires when audio cell changes."""
         from starlette.testclient import TestClient
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
         with TestClient(app) as client:
             with client.websocket_connect(f"/ws/control?token={auth_token}") as ws:
@@ -148,6 +154,7 @@ class TestWebSocketEvents:
         """All connected WebSocket clients receive broadcast events."""
         from starlette.testclient import TestClient
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
         with TestClient(app) as client:
             with client.websocket_connect(f"/ws/control?token={auth_token}") as ws1:

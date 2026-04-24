@@ -1,4 +1,5 @@
 """Layout loading, geometry computation, and transition logic."""
+
 from __future__ import annotations
 
 import json

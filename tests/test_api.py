@@ -1,4 +1,5 @@
 """Tests for FastAPI REST endpoints."""
+
 import pytest
 from httpx import AsyncClient, ASGITransport
 
@@ -24,6 +25,7 @@ async def auth_token(db_path) -> str:
 @pytest.fixture
 async def api_client(db_path, auth_token):
     from server.main import create_app
+
     app = create_app(db_path=db_path, mock_mode=True)
     async with AsyncClient(
         transport=ASGITransport(app=app, raise_app_exceptions=True),
@@ -40,8 +42,11 @@ class TestHealthAndInfo:
     async def test_health_no_auth(self, db_path):
         """GET /api/v1/server/health requires no auth."""
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
             r = await ac.get("/api/v1/server/health")
         assert r.status_code == 200
         assert r.json()["status"] == "ok"
@@ -107,9 +112,10 @@ class TestSources:
     @pytest.mark.asyncio
     async def test_create_source(self, api_client):
         """POST /api/v1/sources creates a new source."""
-        r = await api_client.post("/api/v1/sources", json={
-            "name": "YouTube TV", "type": "url", "url": "https://tv.youtube.com"
-        })
+        r = await api_client.post(
+            "/api/v1/sources",
+            json={"name": "YouTube TV", "type": "url", "url": "https://tv.youtube.com"},
+        )
         assert r.status_code == 201
         assert r.json()["id"] == "youtube-tv"
 
@@ -123,9 +129,10 @@ class TestSources:
     @pytest.mark.asyncio
     async def test_delete_custom_source(self, api_client):
         """DELETE /api/v1/sources/{id} removes a custom source."""
-        await api_client.post("/api/v1/sources", json={
-            "name": "My Stream", "type": "url", "url": "https://my.stream"
-        })
+        await api_client.post(
+            "/api/v1/sources",
+            json={"name": "My Stream", "type": "url", "url": "https://my.stream"},
+        )
         r = await api_client.delete("/api/v1/sources/my-stream")
         assert r.status_code == 204
 

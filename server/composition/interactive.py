@@ -1,4 +1,5 @@
 """Interactive mode manager — pauses geometry enforcement for one cell."""
+
 from __future__ import annotations
 
 
@@ -24,7 +25,10 @@ class InteractiveManager:
 
         Raises InteractiveConflictError if another cell is already interactive.
         """
-        if self._active_cell_index is not None and self._active_cell_index != cell_index:
+        if (
+            self._active_cell_index is not None
+            and self._active_cell_index != cell_index
+        ):
             raise InteractiveConflictError(
                 f"Interactive mode already active on cell {self._active_cell_index}"
             )

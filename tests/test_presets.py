@@ -1,4 +1,5 @@
 """Tests for preset save/load/apply/delete."""
+
 import pytest
 from httpx import AsyncClient, ASGITransport
 
@@ -24,6 +25,7 @@ async def auth_token(db_path) -> str:
 @pytest.fixture
 async def api_client(db_path, auth_token):
     from server.main import create_app
+
     app = create_app(db_path=db_path, mock_mode=True)
     async with AsyncClient(
         transport=ASGITransport(app=app, raise_app_exceptions=True),
@@ -50,7 +52,9 @@ class TestPresetManager:
         layout_manager = LayoutManager()
         layout_manager.load_layouts(config.layouts_dir)
         window_manager = create_window_manager(mock_mode=True)
-        chromium_launcher = create_chromium_launcher(mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium")
+        chromium_launcher = create_chromium_launcher(
+            mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium"
+        )
         registry = SourceRegistry(db_path)
         engine = CompositionEngine(
             layout_manager=layout_manager,
@@ -87,7 +91,9 @@ class TestPresetManager:
         layout_manager = LayoutManager()
         layout_manager.load_layouts(config.layouts_dir)
         window_manager = create_window_manager(mock_mode=True)
-        chromium_launcher = create_chromium_launcher(mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium")
+        chromium_launcher = create_chromium_launcher(
+            mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium"
+        )
         registry = SourceRegistry(db_path)
         engine = CompositionEngine(
             layout_manager=layout_manager,
@@ -126,7 +132,9 @@ class TestPresetManager:
         layout_manager = LayoutManager()
         layout_manager.load_layouts(config.layouts_dir)
         window_manager = create_window_manager(mock_mode=True)
-        chromium_launcher = create_chromium_launcher(mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium")
+        chromium_launcher = create_chromium_launcher(
+            mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium"
+        )
         registry = SourceRegistry(db_path)
         engine = CompositionEngine(
             layout_manager=layout_manager,
@@ -160,7 +168,9 @@ class TestPresetManager:
         layout_manager = LayoutManager()
         layout_manager.load_layouts(config.layouts_dir)
         window_manager = create_window_manager(mock_mode=True)
-        chromium_launcher = create_chromium_launcher(mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium")
+        chromium_launcher = create_chromium_launcher(
+            mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium"
+        )
         registry = SourceRegistry(db_path)
         engine = CompositionEngine(
             layout_manager=layout_manager,
@@ -191,7 +201,9 @@ class TestPresetManager:
         layout_manager = LayoutManager()
         layout_manager.load_layouts(config.layouts_dir)
         window_manager = create_window_manager(mock_mode=True)
-        chromium_launcher = create_chromium_launcher(mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium")
+        chromium_launcher = create_chromium_launcher(
+            mock_mode=True, profiles_dir="/tmp", chromium_binary="chromium"
+        )
         registry = SourceRegistry(db_path)
         engine = CompositionEngine(
             layout_manager=layout_manager,
@@ -209,6 +221,7 @@ class TestPresetManager:
 
         # Now "delete" espn from the registry by directly removing (simulate using raw DB)
         import aiosqlite
+
         async with aiosqlite.connect(db_path) as conn:
             await conn.execute("DELETE FROM sources WHERE id = 'espn'")
             await conn.commit()

@@ -1,4 +1,5 @@
 """Event bus for broadcasting state changes to WebSocket clients."""
+
 from __future__ import annotations
 
 import asyncio

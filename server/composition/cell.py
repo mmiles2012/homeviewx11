@@ -1,4 +1,5 @@
 """Cell class — wraps a Chromium subprocess with lifecycle management."""
+
 from __future__ import annotations
 
 import asyncio
@@ -130,7 +131,9 @@ def create_chromium_launcher(
     """Return the appropriate Chromium launcher for the current environment."""
     if mock_mode:
         return MockChromiumLauncher(profiles_dir=profiles_dir)
-    return RealChromiumLauncher(profiles_dir=profiles_dir, chromium_binary=chromium_binary)
+    return RealChromiumLauncher(
+        profiles_dir=profiles_dir, chromium_binary=chromium_binary
+    )
 
 
 # ---------------------------------------------------------------------------

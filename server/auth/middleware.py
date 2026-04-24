@@ -1,4 +1,5 @@
 """FastAPI auth dependency — validates Bearer tokens."""
+
 from __future__ import annotations
 
 from fastapi import Depends, HTTPException, Request

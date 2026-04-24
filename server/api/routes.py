@@ -1,4 +1,5 @@
 """All REST API routes per PRD Section 5.5.1."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -7,25 +8,43 @@ from server.api.dependencies import get_engine, get_source_registry, get_preset_
 from server.composition.engine import CompositionEngine
 from server.models import SourceCreate, SourceUpdate
 from server.composition.interactive import InteractiveConflictError
-from server.presets.manager import PresetManager, PresetNotFoundError as _PresetNotFoundError
-from server.sources.registry import SourceNotFoundError, SourceAlreadyExistsError, SourceRegistry
+from server.presets.manager import (
+    PresetManager,
+    PresetNotFoundError as _PresetNotFoundError,
+)
+from server.sources.registry import (
+    SourceNotFoundError,
+    SourceAlreadyExistsError,
+    SourceRegistry,
+)
 
 router = APIRouter(prefix="/api/v1")
 
-_NOT_IMPLEMENTED = {"error": {"code": "NOT_IMPLEMENTED", "message": "Not yet implemented", "details": {}}}
+_NOT_IMPLEMENTED = {
+    "error": {
+        "code": "NOT_IMPLEMENTED",
+        "message": "Not yet implemented",
+        "details": {},
+    }
+}
 
 
 def _err(code: str, message: str, status: int = 400) -> HTTPException:
-    return HTTPException(status_code=status, detail={"error": {"code": code, "message": message, "details": {}}})
+    return HTTPException(
+        status_code=status,
+        detail={"error": {"code": code, "message": message, "details": {}}},
+    )
 
 
 # ---------------------------------------------------------------------------
 # Server
 # ---------------------------------------------------------------------------
 
+
 @router.get("/server/info")
 async def server_info(request: Request) -> dict:
     from server.config import get_config
+
     config = get_config()
     return {
         "server_name": config.server_name,
@@ -37,6 +56,7 @@ async def server_info(request: Request) -> dict:
 # ---------------------------------------------------------------------------
 # Status
 # ---------------------------------------------------------------------------
+
 
 @router.get("/status")
 async def get_status(engine: CompositionEngine = Depends(get_engine)) -> dict:
@@ -52,14 +72,25 @@ async def get_status(engine: CompositionEngine = Depends(get_engine)) -> dict:
 # Layouts
 # ---------------------------------------------------------------------------
 
+
 @router.get("/layouts")
 async def list_layouts(engine: CompositionEngine = Depends(get_engine)) -> list:
     layouts = engine._layout_manager.list_layouts()
-    return [{"id": lay.id, "name": lay.name, "gap_px": lay.gap_px, "cell_count": len(lay.cells)} for lay in layouts]
+    return [
+        {
+            "id": lay.id,
+            "name": lay.name,
+            "gap_px": lay.gap_px,
+            "cell_count": len(lay.cells),
+        }
+        for lay in layouts
+    ]
 
 
 @router.put("/layout")
-async def apply_layout(body: dict, engine: CompositionEngine = Depends(get_engine)) -> dict:
+async def apply_layout(
+    body: dict, engine: CompositionEngine = Depends(get_engine)
+) -> dict:
     layout_id = body.get("layout_id")
     if not layout_id:
         raise _err("MISSING_FIELD", "layout_id is required", 422)
@@ -74,6 +105,7 @@ async def apply_layout(body: dict, engine: CompositionEngine = Depends(get_engin
 # Sources
 # ---------------------------------------------------------------------------
 
+
 @router.get("/sources")
 async def list_sources(registry: SourceRegistry = Depends(get_source_registry)) -> list:
     sources = await registry.list_sources()
@@ -81,7 +113,9 @@ async def list_sources(registry: SourceRegistry = Depends(get_source_registry)) 
 
 
 @router.get("/sources/{source_id}")
-async def get_source(source_id: str, registry: SourceRegistry = Depends(get_source_registry)) -> dict:
+async def get_source(
+    source_id: str, registry: SourceRegistry = Depends(get_source_registry)
+) -> dict:
     try:
         return (await registry.get_source(source_id)).model_dump()
     except SourceNotFoundError:
@@ -89,7 +123,9 @@ async def get_source(source_id: str, registry: SourceRegistry = Depends(get_sour
 
 
 @router.post("/sources", status_code=201)
-async def create_source(body: dict, registry: SourceRegistry = Depends(get_source_registry)) -> dict:
+async def create_source(
+    body: dict, registry: SourceRegistry = Depends(get_source_registry)
+) -> dict:
     try:
         data = SourceCreate(**body)
         source = await registry.create_source(data)
@@ -99,7 +135,9 @@ async def create_source(body: dict, registry: SourceRegistry = Depends(get_sourc
 
 
 @router.put("/sources/{source_id}")
-async def update_source(source_id: str, body: dict, registry: SourceRegistry = Depends(get_source_registry)) -> dict:
+async def update_source(
+    source_id: str, body: dict, registry: SourceRegistry = Depends(get_source_registry)
+) -> dict:
     try:
         data = SourceUpdate(**body)
         source = await registry.update_source(source_id, data)
@@ -109,7 +147,9 @@ async def update_source(source_id: str, body: dict, registry: SourceRegistry = D
 
 
 @router.delete("/sources/{source_id}", status_code=204)
-async def delete_source(source_id: str, registry: SourceRegistry = Depends(get_source_registry)) -> None:
+async def delete_source(
+    source_id: str, registry: SourceRegistry = Depends(get_source_registry)
+) -> None:
     try:
         await registry.delete_source(source_id)
     except SourceNotFoundError:
@@ -122,8 +162,11 @@ async def delete_source(source_id: str, registry: SourceRegistry = Depends(get_s
 # Cells
 # ---------------------------------------------------------------------------
 
+
 @router.put("/cells/{cell_index}/source")
-async def assign_source(cell_index: int, body: dict, engine: CompositionEngine = Depends(get_engine)) -> dict:
+async def assign_source(
+    cell_index: int, body: dict, engine: CompositionEngine = Depends(get_engine)
+) -> dict:
     source_id = body.get("source_id")
     if not source_id:
         raise _err("MISSING_FIELD", "source_id is required", 422)
@@ -135,7 +178,9 @@ async def assign_source(cell_index: int, body: dict, engine: CompositionEngine =
 
 
 @router.delete("/cells/{cell_index}/source", status_code=204)
-async def clear_cell(cell_index: int, engine: CompositionEngine = Depends(get_engine)) -> None:
+async def clear_cell(
+    cell_index: int, engine: CompositionEngine = Depends(get_engine)
+) -> None:
     try:
         await engine.clear_cell(cell_index=cell_index)
     except ValueError as e:
@@ -146,8 +191,11 @@ async def clear_cell(cell_index: int, engine: CompositionEngine = Depends(get_en
 # Audio
 # ---------------------------------------------------------------------------
 
+
 @router.put("/audio/active")
-async def set_active_audio(body: dict, engine: CompositionEngine = Depends(get_engine)) -> dict:
+async def set_active_audio(
+    body: dict, engine: CompositionEngine = Depends(get_engine)
+) -> dict:
     cell_index = body.get("cell_index")
     engine._active_audio_cell = cell_index
     engine._notify_state_change()
@@ -158,6 +206,7 @@ async def set_active_audio(body: dict, engine: CompositionEngine = Depends(get_e
 # Presets
 # ---------------------------------------------------------------------------
 
+
 @router.get("/presets")
 async def list_presets(mgr: PresetManager = Depends(get_preset_manager)) -> list:
     presets = await mgr.list_presets()
@@ -165,7 +214,9 @@ async def list_presets(mgr: PresetManager = Depends(get_preset_manager)) -> list
 
 
 @router.post("/presets", status_code=201)
-async def save_preset(body: dict, mgr: PresetManager = Depends(get_preset_manager)) -> dict:
+async def save_preset(
+    body: dict, mgr: PresetManager = Depends(get_preset_manager)
+) -> dict:
     name = body.get("name")
     if not name:
         raise _err("MISSING_FIELD", "name is required", 422)
@@ -174,7 +225,9 @@ async def save_preset(body: dict, mgr: PresetManager = Depends(get_preset_manage
 
 
 @router.put("/presets/{preset_id}/apply")
-async def apply_preset(preset_id: str, mgr: PresetManager = Depends(get_preset_manager)) -> dict:
+async def apply_preset(
+    preset_id: str, mgr: PresetManager = Depends(get_preset_manager)
+) -> dict:
     try:
         await mgr.apply_preset(preset_id)
     except _PresetNotFoundError:
@@ -183,7 +236,9 @@ async def apply_preset(preset_id: str, mgr: PresetManager = Depends(get_preset_m
 
 
 @router.delete("/presets/{preset_id}", status_code=204)
-async def delete_preset(preset_id: str, mgr: PresetManager = Depends(get_preset_manager)) -> None:
+async def delete_preset(
+    preset_id: str, mgr: PresetManager = Depends(get_preset_manager)
+) -> None:
     try:
         await mgr.delete_preset(preset_id)
     except _PresetNotFoundError:
@@ -193,6 +248,7 @@ async def delete_preset(preset_id: str, mgr: PresetManager = Depends(get_preset_
 # ---------------------------------------------------------------------------
 # Interactive Mode
 # ---------------------------------------------------------------------------
+
 
 @router.post("/interactive/start")
 async def start_interactive(

@@ -1,4 +1,5 @@
 """Composition engine — orchestrates cells, layouts, window placement, and state."""
+
 from __future__ import annotations
 
 import asyncio
@@ -100,9 +101,7 @@ class CompositionEngine:
         if self._layout_id is not None:
             try:
                 old_layout = self._layout_manager.get_layout(self._layout_id)
-                old_assignments = {
-                    c.cell_index: c.source_id for c in self._cells
-                }
+                old_assignments = {c.cell_index: c.source_id for c in self._cells}
                 new_assignments = self._layout_manager.compute_transition(
                     old_layout, new_layout, old_assignments
                 )
@@ -132,7 +131,9 @@ class CompositionEngine:
                     await cell.launch(url=source.url, source_id=src)
                     await self._place_window(cell)
                 except Exception as exc:
-                    logger.warning("Failed to relaunch cell %d: %s", cell.cell_index, exc)
+                    logger.warning(
+                        "Failed to relaunch cell %d: %s", cell.cell_index, exc
+                    )
 
         self._notify_state_change()
 
@@ -202,6 +203,10 @@ class CompositionEngine:
         """Register a callback that fires on any state change."""
         self._state_callbacks.append(callback)
 
+    def on_health_event(self, callback: Callable) -> None:
+        """Register a callback that fires on cell health events."""
+        self._health_monitor._on_event = callback
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
@@ -229,10 +234,14 @@ class CompositionEngine:
 
         window_id = self._window_manager.find_window_by_pid(cell.pid, timeout=5.0)
         if window_id is None:
-            logger.warning("Could not find window for cell %d (pid %d)", cell.cell_index, cell.pid)
+            logger.warning(
+                "Could not find window for cell %d (pid %d)", cell.cell_index, cell.pid
+            )
             return
 
-        self._window_manager.set_geometry(window_id, geom.x, geom.y, geom.width, geom.height)
+        self._window_manager.set_geometry(
+            window_id, geom.x, geom.y, geom.width, geom.height
+        )
         self._window_manager.remove_decorations(window_id)
         self._window_manager.set_always_on_top(window_id)
 
@@ -256,4 +265,8 @@ class CompositionEngine:
                     try:
                         await self._place_window(cell)
                     except Exception as exc:
-                        logger.warning("Geometry enforcement failed for cell %d: %s", cell.cell_index, exc)
+                        logger.warning(
+                            "Geometry enforcement failed for cell %d: %s",
+                            cell.cell_index,
+                            exc,
+                        )

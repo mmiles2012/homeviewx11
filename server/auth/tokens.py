@@ -1,4 +1,5 @@
 """Token management — create, validate, and revoke Bearer tokens."""
+
 from __future__ import annotations
 
 import hashlib

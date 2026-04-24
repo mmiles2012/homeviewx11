@@ -1,10 +1,12 @@
 """Tests for server configuration."""
+
 import os
 
 
 def test_config_defaults():
     """Config loads with sensible defaults."""
     from server.config import get_config
+
     # Clear any env overrides and reset cache
     os.environ.pop("HOMEVIEW_MOCK", None)
     os.environ.pop("HOMEVIEW_PORT", None)
@@ -21,6 +23,7 @@ def test_config_defaults():
 def test_config_mock_mode_from_env():
     """HOMEVIEW_MOCK=1 activates mock mode."""
     from server.config import get_config
+
     os.environ["HOMEVIEW_MOCK"] = "1"
     try:
         get_config.cache_clear()
@@ -34,6 +37,7 @@ def test_config_mock_mode_from_env():
 def test_config_port_from_env():
     """HOMEVIEW_PORT overrides default port."""
     from server.config import get_config
+
     os.environ["HOMEVIEW_PORT"] = "9000"
     try:
         get_config.cache_clear()
@@ -47,6 +51,7 @@ def test_config_port_from_env():
 def test_config_has_required_fields():
     """Config has all required fields for the server."""
     from server.config import get_config
+
     config = get_config()
 
     assert hasattr(config, "host")
@@ -62,6 +67,7 @@ def test_config_has_required_fields():
 def test_config_mock_display_resolution():
     """Mock mode provides a default display resolution."""
     from server.config import get_config
+
     os.environ["HOMEVIEW_MOCK"] = "1"
     try:
         get_config.cache_clear()

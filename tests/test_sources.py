@@ -1,8 +1,13 @@
 """Tests for the source registry."""
+
 import pytest
 
 from server.db import init_db
-from server.sources.registry import SourceRegistry, SourceNotFoundError, SourceAlreadyExistsError
+from server.sources.registry import (
+    SourceRegistry,
+    SourceNotFoundError,
+    SourceAlreadyExistsError,
+)
 from server.models import SourceCreate, SourceUpdate
 
 

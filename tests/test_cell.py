@@ -1,7 +1,13 @@
 """Tests for the Cell class and Chromium process lifecycle."""
+
 import pytest
 
-from server.composition.cell import Cell, CellStatus, MockChromiumLauncher, create_chromium_launcher
+from server.composition.cell import (
+    Cell,
+    CellStatus,
+    MockChromiumLauncher,
+    create_chromium_launcher,
+)
 
 
 @pytest.fixture
@@ -79,14 +85,19 @@ class TestChromiumLauncherFactory:
     def test_factory_mock_mode(self, tmp_path):
         """create_chromium_launcher(mock_mode=True) returns MockChromiumLauncher."""
         launcher = create_chromium_launcher(
-            mock_mode=True, profiles_dir=str(tmp_path), chromium_binary="chromium-browser"
+            mock_mode=True,
+            profiles_dir=str(tmp_path),
+            chromium_binary="chromium-browser",
         )
         assert isinstance(launcher, MockChromiumLauncher)
 
     def test_factory_real_mode_class(self, tmp_path):
         """create_chromium_launcher(mock_mode=False) returns RealChromiumLauncher."""
         from server.composition.cell import RealChromiumLauncher
+
         launcher = create_chromium_launcher(
-            mock_mode=False, profiles_dir=str(tmp_path), chromium_binary="chromium-browser"
+            mock_mode=False,
+            profiles_dir=str(tmp_path),
+            chromium_binary="chromium-browser",
         )
         assert isinstance(launcher, RealChromiumLauncher)

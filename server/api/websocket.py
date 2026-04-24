@@ -1,4 +1,5 @@
 """WebSocket endpoint for real-time state updates."""
+
 from __future__ import annotations
 
 import asyncio
@@ -41,14 +42,16 @@ async def websocket_control(websocket: WebSocket) -> None:
         # Send initial state snapshot
         engine = websocket.app.state.engine
         state = engine.get_state()
-        await websocket.send_json({
-            "type": "state.updated",
-            "data": {
-                "layout_id": state.layout_id,
-                "cells": [c.model_dump() for c in state.cells],
-                "audio": state.audio.model_dump(),
-            },
-        })
+        await websocket.send_json(
+            {
+                "type": "state.updated",
+                "data": {
+                    "layout_id": state.layout_id,
+                    "cells": [c.model_dump() for c in state.cells],
+                    "audio": state.audio.model_dump(),
+                },
+            }
+        )
 
         # Relay events until client disconnects
         while True:

@@ -1,4 +1,5 @@
 """Tests for the FastAPI application entry point."""
+
 import pytest
 from httpx import AsyncClient
 

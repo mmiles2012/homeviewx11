@@ -1,4 +1,5 @@
 """Pairing manager — 6-digit code generation and validation."""
+
 from __future__ import annotations
 
 import secrets

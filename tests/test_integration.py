@@ -1,4 +1,5 @@
 """End-to-end integration tests exercising full API flows in mock mode."""
+
 import pytest
 from starlette.testclient import TestClient
 

@@ -1,4 +1,5 @@
 """Tests for pairing flow, token management, and auth middleware."""
+
 import pytest
 from httpx import AsyncClient, ASGITransport
 
@@ -41,6 +42,7 @@ class TestTokenManager:
     async def test_token_stored_as_hash(self, token_mgr, db_path):
         """Token is stored as SHA-256 hash, not plaintext."""
         import aiosqlite
+
         token = await token_mgr.create_token()
         async with aiosqlite.connect(db_path) as conn:
             cursor = await conn.execute("SELECT token FROM auth_tokens")
@@ -126,8 +128,11 @@ class TestAuthMiddleware:
     async def test_unauthenticated_request_returns_401(self, db_path):
         """Requests without a valid token return 401 on protected endpoints."""
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
             async with app.router.lifespan_context(app):
                 response = await ac.get("/api/v1/status")
         assert response.status_code == 401
@@ -136,8 +141,11 @@ class TestAuthMiddleware:
     async def test_pairing_endpoint_accessible_without_token(self, db_path):
         """POST /api/v1/pair and GET /api/v1/pair/code do not require auth."""
         from server.main import create_app
+
         app = create_app(db_path=db_path, mock_mode=True)
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
             async with app.router.lifespan_context(app):
                 response = await ac.get("/api/v1/pair/code")
         # 200 (code available) or 404 (already paired) — not 401
@@ -148,12 +156,15 @@ class TestAuthMiddleware:
         """Valid Bearer token allows access to protected endpoints."""
         from server.main import create_app
         from server.auth.pairing import PairingManager
+
         pairing = PairingManager(db_path)
         code = await pairing.generate_pairing_code()
         token = await pairing.validate_code(code)
 
         app = create_app(db_path=db_path, mock_mode=True)
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
             async with app.router.lifespan_context(app):
                 response = await ac.get(
                     "/api/v1/status",

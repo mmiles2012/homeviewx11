@@ -1,4 +1,5 @@
 """Preset save/load/apply backed by SQLite."""
+
 from __future__ import annotations
 
 import json
@@ -129,10 +130,15 @@ class PresetManager:
                     pass
             else:
                 try:
-                    await self._engine.assign_source(cell_index=cell_index, source_id=source_id)
+                    await self._engine.assign_source(
+                        cell_index=cell_index, source_id=source_id
+                    )
                 except Exception as exc:
                     logger.warning(
-                        "Skipping source '%s' for cell %d: %s", source_id, cell_index, exc
+                        "Skipping source '%s' for cell %d: %s",
+                        source_id,
+                        cell_index,
+                        exc,
                     )
 
         # 3. Restore active audio cell
@@ -142,7 +148,9 @@ class PresetManager:
     async def delete_preset(self, preset_id: str) -> None:
         """Remove a preset from the DB."""
         async with aiosqlite.connect(self._db_path) as conn:
-            cursor = await conn.execute("DELETE FROM presets WHERE id = ?", (preset_id,))
+            cursor = await conn.execute(
+                "DELETE FROM presets WHERE id = ?", (preset_id,)
+            )
             await conn.commit()
             if cursor.rowcount == 0:
                 raise PresetNotFoundError(f"Preset '{preset_id}' not found")

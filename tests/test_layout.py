@@ -1,4 +1,5 @@
 """Tests for the layout system."""
+
 import pytest
 from pathlib import Path
 
@@ -111,7 +112,9 @@ class TestLayoutTransition:
         old_layout = manager.get_layout("side_by_side")
         new_layout = manager.get_layout("side_by_side")
         old_assignments = {0: "espn", 1: "prime"}
-        new_assignments = manager.compute_transition(old_layout, new_layout, old_assignments)
+        new_assignments = manager.compute_transition(
+            old_layout, new_layout, old_assignments
+        )
         assert new_assignments[0] == "espn"
         assert new_assignments[1] == "prime"
 
@@ -120,7 +123,9 @@ class TestLayoutTransition:
         old_layout = manager.get_layout("single")
         new_layout = manager.get_layout("2x2")
         old_assignments = {0: "espn"}
-        new_assignments = manager.compute_transition(old_layout, new_layout, old_assignments)
+        new_assignments = manager.compute_transition(
+            old_layout, new_layout, old_assignments
+        )
         # Hero maps to hero (cell 0 in 2x2 = first grid cell)
         assert "espn" in new_assignments.values()
         # Other 3 cells should be None
@@ -132,5 +137,7 @@ class TestLayoutTransition:
         old_layout = manager.get_layout("2x2")
         new_layout = manager.get_layout("single")
         old_assignments = {0: "espn", 1: "prime", 2: "netflix", 3: None}
-        new_assignments = manager.compute_transition(old_layout, new_layout, old_assignments)
+        new_assignments = manager.compute_transition(
+            old_layout, new_layout, old_assignments
+        )
         assert len(new_assignments) == 1

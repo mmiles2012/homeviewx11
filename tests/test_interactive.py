@@ -1,4 +1,5 @@
 """Tests for interactive mode start/stop per cell."""
+
 import pytest
 from httpx import AsyncClient, ASGITransport
 
@@ -24,6 +25,7 @@ async def auth_token(db_path) -> str:
 @pytest.fixture
 async def api_client(db_path, auth_token):
     from server.main import create_app
+
     app = create_app(db_path=db_path, mock_mode=True)
     async with AsyncClient(
         transport=ASGITransport(app=app, raise_app_exceptions=True),
@@ -37,6 +39,7 @@ async def api_client(db_path, auth_token):
 class TestInteractiveManager:
     def _make_manager(self):
         from server.composition.interactive import InteractiveManager
+
         return InteractiveManager()
 
     def test_initial_state_not_active(self):
@@ -70,6 +73,7 @@ class TestInteractiveManager:
     def test_start_different_cell_raises(self):
         """start() on a different cell when already active raises ConflictError."""
         from server.composition.interactive import InteractiveConflictError
+
         mgr = self._make_manager()
         mgr.start(cell_index=0)
         with pytest.raises(InteractiveConflictError):

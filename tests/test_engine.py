@@ -1,4 +1,5 @@
 """Tests for the CompositionEngine."""
+
 import pytest
 from pathlib import Path
 

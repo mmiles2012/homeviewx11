@@ -1,0 +1,314 @@
+{
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Pairing error envelope",
+      "tier": 1,
+      "depends_on": [],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-002",
+      "title": "Cell health WS events",
+      "tier": 1,
+      "depends_on": [],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-003",
+      "title": "Static serving + CORS",
+      "tier": 1,
+      "depends_on": [],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-004",
+      "title": "Vite + React + TS project scaffold",
+      "tier": 1,
+      "depends_on": [],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-005",
+      "title": "Vite dev proxy",
+      "tier": 1,
+      "depends_on": [],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-006",
+      "title": "TV pairing overlay",
+      "tier": 1,
+      "depends_on": [
+        "T-001"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-007",
+      "title": "PWA manifest + service worker",
+      "tier": 1,
+      "depends_on": [
+        "T-004"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-008",
+      "title": "API client layer -- public endpoints",
+      "tier": 1,
+      "depends_on": [
+        "T-004"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-009",
+      "title": "API client layer -- protected endpoints",
+      "tier": 1,
+      "depends_on": [
+        "T-004"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-010",
+      "title": "API client layer -- error handling + auth pattern",
+      "tier": 1,
+      "depends_on": [
+        "T-004"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-011",
+      "title": "Production build integration",
+      "tier": 1,
+      "depends_on": [
+        "T-004"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-012",
+      "title": "App state shape + types",
+      "tier": 1,
+      "depends_on": [
+        "T-004"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-013",
+      "title": "Test infrastructure (Vitest + jsdom)",
+      "tier": 1,
+      "depends_on": [
+        "T-004"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-014",
+      "title": "State reducer",
+      "tier": 2,
+      "depends_on": [
+        "T-012"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-015",
+      "title": "Coverage threshold config",
+      "tier": 2,
+      "depends_on": [
+        "T-013"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-016",
+      "title": "WebSocket hook",
+      "tier": 3,
+      "depends_on": [
+        "T-014",
+        "T-008",
+        "T-009",
+        "T-010"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-017",
+      "title": "Reducer tests",
+      "tier": 3,
+      "depends_on": [
+        "T-014",
+        "T-013"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-018",
+      "title": "API client tests",
+      "tier": 3,
+      "depends_on": [
+        "T-008",
+        "T-009",
+        "T-010",
+        "T-013"
+      ],
+      "status": "done",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-019",
+      "title": "Context provider",
+      "tier": 4,
+      "depends_on": [
+        "T-016"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-020",
+      "title": "WS hook tests",
+      "tier": 4,
+      "depends_on": [
+        "T-016",
+        "T-013"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-021",
+      "title": "Pair screen",
+      "tier": 5,
+      "depends_on": [
+        "T-019",
+        "T-008",
+        "T-010"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-022",
+      "title": "Main screen + CellCard",
+      "tier": 5,
+      "depends_on": [
+        "T-019",
+        "T-008"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-023",
+      "title": "Settings screen",
+      "tier": 5,
+      "depends_on": [
+        "T-019"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-024",
+      "title": "Source Picker",
+      "tier": 6,
+      "depends_on": [
+        "T-022"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-025",
+      "title": "Layout Picker screen",
+      "tier": 6,
+      "depends_on": [
+        "T-022"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-026",
+      "title": "Audio Picker screen",
+      "tier": 6,
+      "depends_on": [
+        "T-022"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-027",
+      "title": "Presets screen",
+      "tier": 6,
+      "depends_on": [
+        "T-022"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    },
+    {
+      "id": "T-028",
+      "title": "Interactive mode",
+      "tier": 6,
+      "depends_on": [
+        "T-022"
+      ],
+      "status": "pending",
+      "depth": "standard",
+      "repo": null
+    }
+  ],
+  "updated_at": "2026-04-24T19:11:04.131947+00:00"
+}

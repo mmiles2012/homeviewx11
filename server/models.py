@@ -1,4 +1,5 @@
 """Pydantic domain models for HomeView server."""
+
 from __future__ import annotations
 
 import re

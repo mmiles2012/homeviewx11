@@ -1,4 +1,5 @@
 """Health monitor — crash detection, exponential backoff restart, crash-loop protection."""
+
 from __future__ import annotations
 
 import asyncio
@@ -19,7 +20,7 @@ def compute_backoff(consecutive_crashes: int) -> int:
 
     Sequence: 1, 2, 4, 8, 16, 32, 60 (capped).
     """
-    return min(2 ** consecutive_crashes, _MAX_BACKOFF)
+    return min(2**consecutive_crashes, _MAX_BACKOFF)
 
 
 @dataclass
@@ -124,32 +125,40 @@ class HealthMonitor:
 
             if state.is_failed:
                 logger.error("Cell %d crash-looped; marking FAILED", cell.cell_index)
-                self._on_event(HealthEvent(
-                    cell_index=cell.cell_index,
-                    event_type="cell_failed",
-                    detail=f"Crashed {state.consecutive_crashes} times",
-                ))
+                self._on_event(
+                    HealthEvent(
+                        cell_index=cell.cell_index,
+                        event_type="cell_failed",
+                        detail=f"Crashed {state.consecutive_crashes} times",
+                    )
+                )
                 return
 
             backoff = state.backoff_seconds
             logger.warning(
                 "Cell %d crashed (count=%d); restarting in %ds",
-                cell.cell_index, state.consecutive_crashes, backoff,
+                cell.cell_index,
+                state.consecutive_crashes,
+                backoff,
             )
-            self._on_event(HealthEvent(
-                cell_index=cell.cell_index,
-                event_type="cell_restarting",
-                detail=f"backoff={backoff}s",
-            ))
+            self._on_event(
+                HealthEvent(
+                    cell_index=cell.cell_index,
+                    event_type="cell_restarting",
+                    detail=f"backoff={backoff}s",
+                )
+            )
 
             if backoff > 0:
                 await asyncio.sleep(backoff)
 
             try:
                 await cell.restart()
-                self._on_event(HealthEvent(
-                    cell_index=cell.cell_index,
-                    event_type="cell_recovered",
-                ))
+                self._on_event(
+                    HealthEvent(
+                        cell_index=cell.cell_index,
+                        event_type="cell_recovered",
+                    )
+                )
             except Exception as exc:
                 logger.error("Cell %d restart failed: %s", cell.cell_index, exc)

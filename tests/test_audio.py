@@ -1,4 +1,5 @@
 """Tests for the audio router."""
+
 import pytest
 
 from server.audio.router import MockAudioRouter, create_audio_router
@@ -79,5 +80,6 @@ class TestAudioRouterFactory:
     def test_factory_real_mode_class(self):
         """create_audio_router(mock_mode=False) returns PulseAudioRouter."""
         from server.audio.router import PulseAudioRouter
+
         router = create_audio_router(mock_mode=False)
         assert isinstance(router, PulseAudioRouter)

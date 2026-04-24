@@ -206,3 +206,7 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 .worktrees/
+
+# PWA build output (served by server but not committed)
+server/static/*
+!server/static/.gitkeep

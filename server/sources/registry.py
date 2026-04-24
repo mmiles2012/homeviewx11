@@ -1,4 +1,5 @@
 """Source registry — CRUD over the sources SQLite table."""
+
 from __future__ import annotations
 
 import re
@@ -53,7 +54,9 @@ class SourceRegistry:
     async def get_source(self, source_id: str) -> Source:
         """Return a single source by id, or raise SourceNotFoundError."""
         async with get_db(self._db_path) as conn:
-            cursor = await conn.execute("SELECT * FROM sources WHERE id = ?", (source_id,))
+            cursor = await conn.execute(
+                "SELECT * FROM sources WHERE id = ?", (source_id,)
+            )
             row = await cursor.fetchone()
         if row is None:
             raise SourceNotFoundError(f"Source '{source_id}' not found")
@@ -64,7 +67,9 @@ class SourceRegistry:
         source_id = _slugify(data.name)
         async with get_db(self._db_path) as conn:
             # Check for collision
-            cursor = await conn.execute("SELECT id FROM sources WHERE id = ?", (source_id,))
+            cursor = await conn.execute(
+                "SELECT id FROM sources WHERE id = ?", (source_id,)
+            )
             if await cursor.fetchone() is not None:
                 raise SourceAlreadyExistsError(f"Source '{source_id}' already exists")
             await conn.execute(

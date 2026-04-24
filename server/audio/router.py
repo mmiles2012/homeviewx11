@@ -1,4 +1,5 @@
 """Audio router — PulseAudio/PipeWire routing via pactl."""
+
 from __future__ import annotations
 
 import asyncio
@@ -126,7 +127,8 @@ class PulseAudioRouter(AudioRouter):
         """Load null sink module and detect HDMI output."""
         # Load null sink for muting
         result = await self._run_pactl(
-            "load-module", _NULL_SINK_MODULE,
+            "load-module",
+            _NULL_SINK_MODULE,
             f"sink_name={_NULL_SINK_NAME}",
             "sink_properties=device.description=HomeView_Mute",
         )
@@ -184,7 +186,8 @@ class PulseAudioRouter(AudioRouter):
 
     async def _run_pactl(self, *args: str) -> str:
         proc = await asyncio.create_subprocess_exec(
-            "pactl", *args,
+            "pactl",
+            *args,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -228,7 +231,8 @@ class PulseAudioRouter(AudioRouter):
         """Background task: parse `pactl subscribe` for new sink-input events."""
         try:
             proc = await asyncio.create_subprocess_exec(
-                "pactl", "subscribe",
+                "pactl",
+                "subscribe",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.DEVNULL,
             )

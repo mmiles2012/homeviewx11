@@ -1,4 +1,5 @@
 """X11 window management — abstract interface with real and mock implementations."""
+
 from __future__ import annotations
 
 import time
@@ -23,7 +24,9 @@ class WindowManager(ABC):
         """Return the window id for a process, or None if not found within timeout."""
 
     @abstractmethod
-    def set_geometry(self, window_id: int, x: int, y: int, width: int, height: int) -> None:
+    def set_geometry(
+        self, window_id: int, x: int, y: int, width: int, height: int
+    ) -> None:
         """Move and resize a window to the given pixel coordinates."""
 
     @abstractmethod
@@ -69,7 +72,9 @@ class MockWindowManager(WindowManager):
         if window_id not in self._geometries:
             raise WindowNotFoundError(f"Window {window_id} not found")
 
-    def set_geometry(self, window_id: int, x: int, y: int, width: int, height: int) -> None:
+    def set_geometry(
+        self, window_id: int, x: int, y: int, width: int, height: int
+    ) -> None:
         self._require_window(window_id)
         self._geometries[window_id] = (x, y, width, height)
 
@@ -145,7 +150,9 @@ class X11WindowManager(WindowManager):
             time.sleep(self._POLL_INTERVAL)
         return None
 
-    def set_geometry(self, window_id: int, x: int, y: int, width: int, height: int) -> None:
+    def set_geometry(
+        self, window_id: int, x: int, y: int, width: int, height: int
+    ) -> None:
         win = self._display.create_resource_object("window", window_id)
         win.configure(x=x, y=y, width=width, height=height)
         self._display.sync()

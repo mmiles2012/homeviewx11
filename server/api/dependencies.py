@@ -1,4 +1,5 @@
 """FastAPI dependency providers — engine, registry, auth."""
+
 from __future__ import annotations
 
 from fastapi import Request

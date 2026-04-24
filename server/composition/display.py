@@ -1,4 +1,5 @@
 """Display resolution detection via xrandr."""
+
 from __future__ import annotations
 
 import logging

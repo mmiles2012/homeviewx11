@@ -1,4 +1,5 @@
 """HomeView server configuration using pydantic-settings."""
+
 import os
 from pathlib import Path
 from functools import lru_cache

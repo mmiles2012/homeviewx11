@@ -1,4 +1,5 @@
 """Tests for the health monitor — crash detection and exponential backoff restarts."""
+
 import asyncio
 import time
 import pytest
@@ -33,6 +34,7 @@ class TestBackoffCalculation:
     def test_backoff_sequence(self):
         """Exponential backoff follows 1s, 2s, 4s, 8s, 16s, max 60s."""
         from server.composition.health import compute_backoff
+
         assert compute_backoff(0) == 1
         assert compute_backoff(1) == 2
         assert compute_backoff(2) == 4
@@ -102,6 +104,7 @@ class TestHealthMonitorEvents:
 
         # Override backoff to 0 for speed
         import server.composition.health as h
+
         original = h.compute_backoff
         h.compute_backoff = lambda n: 0
 

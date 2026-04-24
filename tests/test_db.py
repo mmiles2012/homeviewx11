@@ -1,4 +1,5 @@
 """Tests for database initialization and schema."""
+
 import os
 import pytest
 import aiosqlite

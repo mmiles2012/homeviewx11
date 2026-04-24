@@ -1,7 +1,12 @@
 """Tests for the window manager (mock implementation covers CI; X11 on hardware)."""
+
 import pytest
 
-from server.composition.window import MockWindowManager, create_window_manager, WindowNotFoundError
+from server.composition.window import (
+    MockWindowManager,
+    create_window_manager,
+    WindowNotFoundError,
+)
 
 
 class TestMockWindowManager:
@@ -65,5 +70,6 @@ class TestFactory:
     def test_create_real_manager_class(self):
         """create_window_manager(mock_mode=False) returns an X11WindowManager."""
         from server.composition.window import X11WindowManager
+
         wm = create_window_manager(mock_mode=False)
         assert isinstance(wm, X11WindowManager)

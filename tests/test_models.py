@@ -1,4 +1,5 @@
 """Tests for Pydantic domain models."""
+
 import pytest
 from pydantic import ValidationError
 
